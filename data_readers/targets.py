@@ -7,18 +7,51 @@ from models.user import UserDict
 class Targets(RecSysData):
     def __init__(self, file_path: str):
         super(Targets, self).__init__(file_path)
-        self._solution = np.zeros(len(self.data.index))
+        """
+
+        Initialize an dataset from its path and save its solution 
+
+        :param file_path: path to ratings file 
+        """
+        self._solution: np.ndarray = None
 
     @property
     def solution(self):
+        """
+
+        Get the current solution for an item-based rec sys
+
+        :return: the current solution
+        """
         return self._solution
 
-    def to_csv(self, out_path):
-        self.data["Prediction"] = self._solution
-        self.data.drop(columns=["UserID", "ItemID"], inplace=True)
-        self.data.to_csv(out_path, index=False)
+    def to_csv(self, out_path: str):
+        """
+
+        If the current solution is not None, save the solution to the desirable output file
+        and put it in the correct standard for Kaggle
+
+        :param out_path: path to save the file
+        """
+        if self._solution is not None:
+            print("Generating output file")
+            self.data["Prediction"] = self._solution
+            self.data.drop(columns=["UserID", "ItemID"], inplace=True)
+            self.data.to_csv(out_path, index=False)
 
     def solve(self, item_dict: ItemDict, user_dict: UserDict, avg: int):
+        """
+
+        Predict the ratings by using a item-based model. Set user avg if item not
+        in ItemDict, item avg if user not in UserDict, if none of them is in any
+        dict, rate is the avg then.
+
+        :param item_dict: Dict of item contains useful data to calculate de solution
+        :param user_dict: Dict of user contains useful data to calculate de solution
+        :param avg: global avg of all items ratings
+        """
+        self._solution: np.darray = np.zeros(len(self.data.index))
+        print("Predicting Rates")
         for index, data in enumerate(np.array(self.data)):
             user = data[1]
             item = data[2]
