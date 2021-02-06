@@ -1,6 +1,19 @@
+import numpy as np
+
+
 class EntityDict:
     def __init__(self):
         self._dict: dict = {}
+        self._sm = None
+        self._m = None
+
+    @property
+    def similarity_matrix(self):
+        return self._sm
+
+    @similarity_matrix.setter
+    def similarity_matrix(self, sm: np.ndarray):
+        self._sm = sm
 
     def append(self, key: str):
         """

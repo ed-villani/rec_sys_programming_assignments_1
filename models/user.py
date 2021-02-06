@@ -1,3 +1,5 @@
+import numpy as np
+
 from models.entity import EntityDict
 
 

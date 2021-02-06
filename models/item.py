@@ -1,3 +1,4 @@
+import numpy as np
 from models.entity import EntityDict
 from models.user import UserDict
 
@@ -38,16 +39,14 @@ class ItemDict(EntityDict):
         """
         super(ItemDict, self).add_rating(item_id, user_id, rating)
 
-    def get_similarity(self, item1: str, item2: str) -> float:
+    def get_similarity(self, item: str, user_rates: dict) -> (float, np.ndarray):
         """
 
-        Get the similarity between both items. If not in one, it is in the other.
+        Get the similarities from item
 
-        :param item1: Item to get similarity
-        :param item2: Item to get similarity
-        :return: Similarity between both items
+        :param user_rates: dict of all rates
+        :param item: Item to get similariies
+        :return: Similarities from item
         """
-        if item2 in self.get(item1)['similarities']:
-            return self.get(item1)['similarities'][item2]
-        elif item1 in self.get(item2)['similarities']:
-            return self.get(item2)['similarities'][item1]
+        all_sm = self.sm[self.get_alias_id(item)]
+        return np.sum(np.abs(all_sm)), all_sm[[self.get_alias_id(item_user) for item_user in user_rates]]

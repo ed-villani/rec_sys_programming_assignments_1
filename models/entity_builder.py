@@ -21,7 +21,7 @@ class EntityBuilder:
             cls._m = np.zeros((n_users, n_items), dtype=np.float32)
             cls._initialize_matrix(cls, data, item_dict, user_dict)
 
-            return cls._cosine_similarity(cls)
+            return cls._cosine_similarity(cls), cls._m
 
         def _initialize_matrix(self, data: Ratings, item_dict: ItemDict, user_dict: UserDict):
             """
@@ -59,8 +59,8 @@ class EntityBuilder:
         :param data: Ratings class that contains the data to build the dicts
         """
         item_dict, user_dict, avg = _initialize_dicts(data)
-        sm = EntityBuilder._SimilarityMatrixBuilder(data, item_dict, user_dict)
-        _set_similarities(sm, item_dict)
+        sm, m = EntityBuilder._SimilarityMatrixBuilder(data, item_dict, user_dict)
+        item_dict.sm = sm
         return item_dict, user_dict, avg
 
 
@@ -89,28 +89,3 @@ def _initialize_dicts(data: Ratings) -> (ItemDict, UserDict, float):
     for user in user_dict():
         user_dict.set_normalized_rating(user)
     return item_dict, user_dict, avg
-
-
-def _set_similarities(similarity_matrix: np.array, item_dict: ItemDict):
-    """
-
-    Iter over all itens in the dict key and set them similarities. We do not need to iter in all
-    items, because the matrix is diagonally symmetric. Also ignore zeros values
-
-    :param similarity_matrix:
-    :param item_dict:
-    """
-    print('Putting Similarities in Dicts')
-    for item1 in item_dict():
-        itemA = item_dict()[item1]
-        if 'similarities' not in itemA:
-            itemA['similarities'] = {}
-        for item2 in item_dict():
-            if item1 == item2:
-                break
-            value = similarity_matrix[item_dict.get_alias_id(item2)][item_dict.get_alias_id(item1)]
-            if value == 0:
-                break
-            itemA['similarities'][item2] = value
-            itemB = item_dict()[item2]
-            itemB['similarities'][item1] = value
